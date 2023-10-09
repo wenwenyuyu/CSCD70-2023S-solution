@@ -86,7 +86,7 @@ PreservedAnalyses AlgebraicIdentityPass::run([[maybe_unused]] Function &F,
     }
   }
   
-  outs() << "define dso_local void @foo(i32 noundef %0) {" << "\n";
+  outs() << "define dso_local void @AlgebraicIdentity(i32 noundef %0) {" << "\n";
   outs() << "Algebraic Identity: " << AlgebraicOptNum << "\n";
 
   return PreservedAnalyses::none();
