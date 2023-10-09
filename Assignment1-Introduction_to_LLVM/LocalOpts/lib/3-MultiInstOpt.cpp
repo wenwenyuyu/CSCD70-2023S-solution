@@ -5,7 +5,9 @@ using namespace llvm;
 PreservedAnalyses MultiInstOptPass::run([[maybe_unused]] Function &F,
                                         FunctionAnalysisManager &) {
 
-
+  //常量折叠相关blog:
+  //https://zhuanlan.zhihu.com/p/644260335
+  
   int NumConstFold = 0;
 
   for(auto &BB : F){
