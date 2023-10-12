@@ -60,10 +60,11 @@ protected:
     return StringBuf;
   }
   virtual void printInstDomainValMap(const llvm::Instruction &Inst) const = 0;
- // void printInstDomainValMap(const llvm::Function &F) const {
-  //  for(auto &res : InstDomainValMap)
-    //  printInstDomainValMap(*res.first);
-  //}
+  void printInstDomainValMap(const llvm::Function &F) const {
+    for (const llvm::Instruction &Inst : llvm::instructions(&F)) {
+      printInstDomainValMap(Inst);
+    }
+  }
   virtual std::string getName() const = 0;
 
   /// @}
@@ -99,13 +100,15 @@ protected:
     for(const auto &B : MeetBB){
       // 获得该BB最后一个BinaryOperatorInst的output
       auto IList = getInstConstRange(*B);
-      for(auto iter = std::prev(IList.end()), begin = IList.begin(); iter != begin; --iter){
-        const llvm::Instruction &I = *iter;
-        if(llvm::isa<llvm::BinaryOperator>(&I)){
-          Operands.push_back(InstDomainValMap.at(&I));
-          break;
-        }
-      }
+//      for(auto iter = std::prev(IList.end()), begin = IList.begin(); iter != begin; --iter){
+//        const llvm::Instruction &I = *iter;
+//        if(llvm::isa<llvm::BinaryOperator>(&I)){
+//          Operands.push_back(InstDomainValMap.at(&I));
+//          break;
+//        }
+//      }
+      const llvm::Instruction &I = *std::prev(IList.end());
+      Operands.push_back(InstDomainValMap.at(&I));
     }
 
     return Operands;
@@ -149,11 +152,8 @@ protected:
     for(const auto &BB : BBList){
       DomainVal_t input = getBoundaryVal(BB);
       for(const auto &I : getInstConstRange(BB)){
-        if(llvm::isa<llvm::BinaryOperator>(&I)){
-          
           Changed |= transferFunc(I, input, InstDomainValMap.at(&I)); // error: out of boundary
           input = InstDomainValMap.at(&I);
-        }
       }
     }
 
@@ -185,25 +185,30 @@ protected:
       }
     }
 
-    for(auto res : DomainIdMap)
-      llvm::outs() << res.first << " : " << res.second << "\n";
 
     for(auto &BB : F){
       for(auto &I : BB){
-        if(llvm::isa<llvm::BinaryOperator>(&I))
           InstDomainValMap.emplace(&I, MeetOp.top(DomainVector.size()));
       }
     }
+
+//    for(auto &res : InstDomainValMap){
+//      llvm::outs() << *res.first << "\n";
+//      llvm::outs() << stringifyDomainWithMask(res.second) << "\n";
+//    }
 
     while(traverseCFG(F)){
 
     }
 
-    for(auto &res : InstDomainValMap){
-      llvm::outs() << *res.first << "\n";
-      llvm::outs() << stringifyDomainWithMask(res.second) << "\n";
-    }
+//    for(auto &res : InstDomainValMap){
+//      llvm::outs() << *res.first << "\n";
+//      llvm::outs() << stringifyDomainWithMask(res.second) << "\n";
+//    }
+    for(auto &BB : F)
+      BVs.emplace(&BB, getBoundaryVal(BB));
 
+    printInstDomainValMap(F);
     return std::make_tuple(DomainIdMap, DomainVector, BVs, InstDomainValMap);
   }
 
