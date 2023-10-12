@@ -6,6 +6,16 @@ using namespace llvm;
 
 AnalysisKey AvailExprs::Key;
 
+void AvailExprs::initializeDomainFromInst(const llvm::Instruction &Inst) {
+  if (isa<BinaryOperator>(Inst)) {
+    dfa::Expression expr(*dyn_cast<BinaryOperator>(&Inst));
+    if (DomainIdMap.count(expr) == 0) {
+      DomainVector.push_back(expr);
+      DomainIdMap.insert(std::make_pair(expr, DomainVector.size() - 1));
+    }
+  }
+}
+
 bool AvailExprs::transferFunc(const Instruction &Inst, const DomainVal_t &IDV,
                              DomainVal_t &ODV) {
 

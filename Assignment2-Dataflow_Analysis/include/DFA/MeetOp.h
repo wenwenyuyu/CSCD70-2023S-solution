@@ -69,7 +69,7 @@ struct Union final : MeetOpBase<TValue> {
 
     /// @todo(CSCD70) Please complete this method.
 
-    return DomainVal_t(DomainSize, false);
+    return DomainVal_t(DomainSize, TValue{false});
   }
 };
 

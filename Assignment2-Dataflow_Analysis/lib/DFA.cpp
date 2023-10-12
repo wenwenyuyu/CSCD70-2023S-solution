@@ -15,6 +15,7 @@ extern "C" PassPluginLibraryInfo llvmGetPassPluginInfo() {
             PB.registerAnalysisRegistrationCallback(
                 [](FunctionAnalysisManager &FAM) {
                   FAM.registerPass([&]() { return AvailExprs(); });
+                  FAM.registerPass([&]() { return Liveness(); });
                   /// @todo(CSCD70) Please complete the registration of other
                   ///               passes.
                 });

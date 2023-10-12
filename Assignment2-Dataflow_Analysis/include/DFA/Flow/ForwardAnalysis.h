@@ -39,6 +39,7 @@ protected:
     using llvm::errs;
     using llvm::outs;
     const llvm::BasicBlock *const ParentBB = Inst.getParent();
+    
 
     if (&Inst == &(ParentBB->front())) {
       errs() << "\n";

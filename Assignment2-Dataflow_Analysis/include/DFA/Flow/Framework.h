@@ -6,8 +6,6 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/IR/InstVisitor.h>
 #include <tuple>
-#include "DFA/Domain/Expression.h"
-
 
 namespace dfa {
 
@@ -173,15 +171,18 @@ protected:
   virtual bool transferFunc(const llvm::Instruction &Inst,
                             const DomainVal_t &IDV, DomainVal_t &ODV) = 0;
 
+  virtual void initializeDomainFromInst(const llvm::Instruction &Inst) = 0;
+
   virtual AnalysisResult_t run(llvm::Function &F,
                                llvm::FunctionAnalysisManager &FAM) {
 
     /// @todo(CSCD70) Please complete this method.
-    dfa::Expression::Initializer visitor(DomainIdMap, DomainVector);
+    //dfa::Expression::Initializer visitor(DomainIdMap, DomainVector);
+    //dfa::Variable::Initializer visitor(DomainIdMap, DomainVector);
     TMeetOp MeetOp;
     for(auto &BB : F){
       for(auto &I : BB){
-        visitor.visit(I);
+        initializeDomainFromInst(I);      
       }
     }
 
@@ -201,10 +202,6 @@ protected:
 
     }
 
-//    for(auto &res : InstDomainValMap){
-//      llvm::outs() << *res.first << "\n";
-//      llvm::outs() << stringifyDomainWithMask(res.second) << "\n";
-//    }
     for(auto &BB : F)
       BVs.emplace(&BB, getBoundaryVal(BB));
 

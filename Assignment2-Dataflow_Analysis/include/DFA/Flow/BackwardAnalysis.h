@@ -1,16 +1,25 @@
 #pragma once // NOLINT(llvm-header-guard)
 
 #include "Framework.h"
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/CFG.h>
+#include <llvm/IR/Instruction.h>
+#include <llvm/Support/raw_ostream.h>
 
+/// @todo(CSCD70) Please instantiate for the backward pass, similar to the
+///               forward one.
+/// @sa @c ForwardAnalysis
 namespace dfa {
 
 /// @todo(CSCD70) Please modify the traversal ranges.
 
-typedef llvm::iterator_range<llvm::const_succ_itertor>
+typedef llvm::iterator_range<llvm::const_succ_iterator>
     BackwardMeetBBConstRange_t;
-typedef llvm::iterator_range<llvm::Function::const_iterator>
+typedef llvm::iterator_range<
+    llvm::Function::BasicBlockListType::const_reverse_iterator>
     BackwardBBConstRange_t;
-typedef llvm::iterator_range<llvm::BasicBlock::const_iterator>
+typedef llvm::iterator_range<
+    llvm::BasicBlock::InstListType::const_reverse_iterator>
     BackwardInstConstRange_t;
 
 template <typename TDomainElem, typename TValue, typename TMeetOp>
@@ -31,6 +40,7 @@ protected:
   using Framework_t::DomainVector;
   using Framework_t::InstDomainValMap;
 
+  using Framework_t::getBoundaryVal;
   using Framework_t::getName;
   using Framework_t::run;
   using Framework_t::stringifyDomainWithMask;
@@ -40,28 +50,26 @@ protected:
     using llvm::outs;
     const llvm::BasicBlock *const ParentBB = Inst.getParent();
 
-    if (&Inst == &(ParentBB->back())){
-      errs() << "\n";
-      LOG_ANALYSIS_INFO << "\t" << stringifyDomainWithMask(BVs.at(ParentBB));
-    } // if (&Inst == &(*ParentBB->end())
     outs() << Inst << "\n";
     LOG_ANALYSIS_INFO << "\t"
                       << stringifyDomainWithMask(InstDomainValMap.at(&Inst));
+    if (&Inst == &(ParentBB->back())) {
+      errs() << "\n";
+      LOG_ANALYSIS_INFO << "\t"
+                        << stringifyDomainWithMask(getBoundaryVal(*ParentBB));
+    } // if (&Inst == &(*ParentBB->back()))
   }
 
   MeetBBConstRange_t
   getMeetBBConstRange(const llvm::BasicBlock &BB) const final {
     return llvm::successors(&BB);
   }
-
   InstConstRange_t getInstConstRange(const llvm::BasicBlock &BB) const final {
     return make_range(BB.rbegin(), BB.rend());
   }
-
   BBConstRange_t getBBConstRange(const llvm::Function &F) const final {
-    return make_range(F.rbegin(), F.rend());
+    return make_range(F.end(), F.begin());
   }
-
 };
 
-} // namespace dfa
+} //
