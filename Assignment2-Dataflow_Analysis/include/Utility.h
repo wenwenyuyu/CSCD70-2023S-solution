@@ -54,7 +54,7 @@ struct InternalInfoLogger {
 
 #define LOG_ANALYSIS_INFO                                                      \
   if (auto Logger = InternalInfoLogger(llvm::errs()))                          \
-  llvm::errs() << "[" << getName() << "] "
+  llvm::errs() << "CHECK: [" << getName() << "] "
 
 template <typename T>
 inline bool operator!=(const std::vector<T> &LHS, const std::vector<T> &RHS) {

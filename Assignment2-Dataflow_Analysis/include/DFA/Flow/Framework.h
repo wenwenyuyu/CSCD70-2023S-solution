@@ -13,6 +13,7 @@ template <typename TValue> struct ValuePrinter {
   static std::string print(const TValue &V) { return ""; }
 };
 
+
 template <typename TDomainElem, typename TValue, typename TMeetOp,
           typename TMeetBBConstRange, typename TBBConstRange,
           typename TInstConstRange>
@@ -48,12 +49,12 @@ protected:
         << Mask.size() << " vs. " << DomainIdMap.size() << " vs. "
         << DomainVector.size() << " instead";
     for (size_t DomainId = 0; DomainId < DomainIdMap.size(); ++DomainId) {
-      if (!static_cast<bool>(Mask[DomainId])) {
-        continue;
-      }
+      if (static_cast<bool>(Mask[DomainId])) {
       Strout << DomainVector.at(DomainId)
              << ValuePrinter<TValue>::print(Mask[DomainId]) << ", ";
-    } // for (MaskIdx : [0, Mask.size()))
+      }
+
+   } // for (MaskIdx : [0, Mask.size()))
     Strout << "}";
     return StringBuf;
   }
@@ -63,6 +64,7 @@ protected:
       printInstDomainValMap(Inst);
     }
   }
+
   virtual std::string getName() const = 0;
 
   /// @}
@@ -96,15 +98,8 @@ protected:
     /// @todo(CSCD70) Please complete this method.
     MeetBBConstRange_t MeetBB = getMeetBBConstRange(BB);
     for(const auto &B : MeetBB){
-      // 获得该BB最后一个BinaryOperatorInst的output
+      // 获得该BB最后一个Inst的output
       auto IList = getInstConstRange(*B);
-//      for(auto iter = std::prev(IList.end()), begin = IList.begin(); iter != begin; --iter){
-//        const llvm::Instruction &I = *iter;
-//        if(llvm::isa<llvm::BinaryOperator>(&I)){
-//          Operands.push_back(InstDomainValMap.at(&I));
-//          break;
-//        }
-//      }
       const llvm::Instruction &I = *std::prev(IList.end());
       Operands.push_back(InstDomainValMap.at(&I));
     }
@@ -193,10 +188,6 @@ protected:
       }
     }
 
-//    for(auto &res : InstDomainValMap){
-//      llvm::outs() << *res.first << "\n";
-//      llvm::outs() << stringifyDomainWithMask(res.second) << "\n";
-//    }
 
     while(traverseCFG(F)){
 
@@ -228,4 +219,76 @@ struct Bool {
   explicit operator bool() const { return Value; }
 };
 
-} // namespace dfa
+class ConstValue{
+public:
+  enum class Type {
+    Undef,
+    NAC,
+    ConstantInt,
+  };
+private:
+  Type IsConst;
+  std::int64_t Value;
+
+public:
+
+  ConstValue(): IsConst(Type::Undef), Value(0){}
+  ConstValue(Type IsConst, int64_t Value) {
+    this->IsConst = IsConst; 
+    this->Value = Value;
+  }
+  ConstValue(const ConstValue &Other){
+    IsConst = Other.IsConst;
+    Value = Other.Value;
+  }
+
+  bool isConst() const {
+    return this->IsConst == Type::ConstantInt;
+  }
+
+  bool isUndef() const {
+    return this->IsConst == Type::Undef;
+  }
+
+  bool isNac() const {
+    return this->IsConst == Type::NAC;
+  }
+
+  int64_t getConst() const {
+    return this->Value;
+  }
+
+  static ConstValue getConst(int64_t value){
+    return ConstValue(Type::ConstantInt, value);
+  }
+
+  static ConstValue getUndef(){
+    return ConstValue(Type::Undef, 0);
+  }
+
+  static ConstValue getNac(){
+    return ConstValue(Type::NAC, 0);
+  }
+
+  bool operator!=(const ConstValue& Other) const{
+    return (this->Value != Other.Value || this->IsConst != Other.IsConst);
+  }
+
+  explicit operator bool() const{
+    return (this->IsConst == Type::NAC || this->IsConst == Type::ConstantInt);
+  }
+
+
+};
+
+
+template<>
+struct ValuePrinter<ConstValue> {
+  static std::string print(const dfa::ConstValue &V) {
+    std::string res = "=";
+    if(V.isConst())
+      return res + std::to_string(V.getConst());
+    return res + "NAC";
+  }
+};
+} // namespace 

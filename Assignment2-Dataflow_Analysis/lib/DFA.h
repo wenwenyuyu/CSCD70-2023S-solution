@@ -71,13 +71,38 @@ public:
   }
 };
 
-class SCCPWrapperPass : public llvm::PassInfoMixin<SCCPWrapperPass> {
+
+class SCCP final : public dfa::ForwardAnalysis<dfa::Variable, dfa::ConstValue,
+                                                     dfa::ConstIntersect<dfa::ConstValue>>,
+                         public llvm::AnalysisInfoMixin<SCCP> {
+private:
+  using ForwardAnalysis_t = dfa::ForwardAnalysis<dfa::Variable, dfa::ConstValue,
+                                                 dfa::ConstIntersect<dfa::ConstValue>>;
+
+  friend llvm::AnalysisInfoMixin<SCCP>;
+  static llvm::AnalysisKey Key;
+
+  std::string getName() const final { return "SCCP"; }
+  bool transferFunc(const llvm::Instruction &, const DomainVal_t &,
+                    DomainVal_t &) final;
+  void initializeDomainFromInst(const llvm::Instruction &Inst) final;
+  void handleBO(const llvm::Instruction &, const DomainVal_t &, dfa::ConstValue &);
+
+  void handleCMP(const llvm::Instruction &, const DomainVal_t &, dfa::ConstValue &);
+  void handlePHI(const llvm::Instruction &, const DomainVal_t &, dfa::ConstValue &);
+public:
+  using Result = typename ForwardAnalysis_t::AnalysisResult_t;
+  using ForwardAnalysis_t::run;
+};
+
+class SCCPWrapperPass
+    : public llvm::PassInfoMixin<SCCPWrapperPass> {
 public:
   llvm::PreservedAnalyses run(llvm::Function &F,
                               llvm::FunctionAnalysisManager &FAM) {
-
-    /// @todo(CSCD70) Get the result from the main body.
-
+    FAM.getResult<SCCP>(F);
     return llvm::PreservedAnalyses::all();
   }
 };
+
+
