@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/mnt/build/lib",
+  "command": "/usr/bin/c++ -DLICM_EXPORTS -I/mnt/include -I/usr/lib/llvm-16/include -std=c++17   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -isystem /usr/lib/llvm-16/include -Wall -fPIC -o CMakeFiles/LICM.dir/LICM.cpp.o -c /mnt/lib/LICM.cpp",
+  "file": "/mnt/lib/LICM.cpp",
+  "output": "lib/CMakeFiles/LICM.dir/LICM.cpp.o"
+},
+{
+  "directory": "/mnt/build/lib",
+  "command": "/usr/bin/c++ -DLICM_EXPORTS -I/mnt/include -I/usr/lib/llvm-16/include -std=c++17   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -isystem /usr/lib/llvm-16/include -Wall -fPIC -o CMakeFiles/LICM.dir/RegAllocIntfGraph.cpp.o -c /mnt/lib/RegAllocIntfGraph.cpp",
+  "file": "/mnt/lib/RegAllocIntfGraph.cpp",
+  "output": "lib/CMakeFiles/LICM.dir/RegAllocIntfGraph.cpp.o"
+}
+]

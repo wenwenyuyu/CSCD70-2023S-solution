@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -I/usr/lib/llvm-16/include -std=c++17   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -isystem /usr/lib/llvm-16/include -Wall -shared -Wl,-soname,libLICM.so -o libLICM.so CMakeFiles/LICM.dir/LICM.cpp.o CMakeFiles/LICM.dir/RegAllocIntfGraph.cpp.o 
